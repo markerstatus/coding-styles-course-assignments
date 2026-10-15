@@ -1,0 +1,9 @@
+See the guide now.
+Another bold word.
+Already classed, with Upper bold inside.
+Class name was uppercase.
+Uppercase paragraph tag.
+
+Visible after the comment.
+spaced inside text
+Line one. Line two. Line three.

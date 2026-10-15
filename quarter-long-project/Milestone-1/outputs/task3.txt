@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>
+<link rel="stylesheet" href="site.css" defer="" />
+<style>
+<body id="page">
+<section id="parent-section">
+<p id="intro">
+<a href="https://example.com" id="first-link">
+<p>
+<b>
+<p class="keep-me">
+<B id="upper-bold">
+<p CLASS="old-class">
+<P id="upper-p">
+<p>
+<p>
+<p>
+<b id="inner-bold">
+<div id="nested">
+<div>
+<span id="spaced">
+<span id="tabbed" class="beside">
+<span id="multiline" class="split">
+<span id="named" "stray"="">
+<span id="empty">
+<span id="slash" />
+<div ID="upper-id">
+<a href="https://example.com/second">
+<p id="voids">
+<br />
+<br />
+<BR />
+<div id="media">
+<img alt="width > height" src="pic.png" />
+<hr />
+<input type="text" value="hello" checked="" />
+<div id="mismatch">
+<span id="inner-span">
+<div id="close-space">
+<script>
+<DIV id="case-div">

@@ -1,0 +1,128 @@
+<!--
+Edges, in order:
+1. doctype, plus text before and after the html element
+2. head: meta with a quoted value that contains spaces and equals, title, link with a boolean defer flag
+3. style raw text, closed with a different-case tag, containing a greater-than
+4. section ancestor of the first anchor, for the parent walk
+5. several paragraphs: id, nested anchor, nested bold, existing class and CLASS, uppercase P, whitespace-only, comment inside a paragraph
+6. nested divs, spaces around equals, a tab between attributes, a tag split across lines, a stray equals, an empty span, a self-closing span
+7. uppercase id attribute, a later anchor with a single-quoted href, outside any section
+8. void tags: br, br/, BR, img whose alt contains a greater-than, hr, input with unquoted values and a boolean checked flag
+9. a mismatched close, an empty tag name, and a close tag with a space before the bracket
+10. script raw text that contains angle brackets and a fake paragraph
+11. a comment between elements, and a div closed with an uppercase tag
+-->
+<!DOCTYPE html>
+before the html element
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>
+            Milestone 1 sample
+        </title>
+        <link rel="stylesheet" href="site.css" defer="" />
+        <style>
+            p > b { color: navy; }
+        </style>
+    </head>
+    <body id="page">
+        <section id="parent-section">
+            <p id="intro" class="test">
+                See
+                <a href="https://example.com" id="first-link">
+                    the guide
+                </a>
+                now.
+            </p>
+            <p class="test">
+                Another
+                <b>
+                    bold
+                </b>
+                word.
+            </p>
+            <p class="test">
+                Already classed, with
+                <B id="upper-bold">
+                    Upper bold
+                </B>
+                inside.
+            </p>
+            <p class="test">
+                Class name was uppercase.
+            </p>
+            <P id="upper-p" class="test">
+                Uppercase paragraph tag.
+            </P>
+            <p class="test">
+            </p>
+            <p class="test">
+                Visible
+                <!-- skipped note -->
+                after the comment.
+            </p>
+            <p class="test">
+                spaced
+                <b id="inner-bold">
+                    inside
+                </b>
+                text
+            </p>
+        </section>
+        <div id="nested">
+            <div>
+                <span id="spaced">
+                    spaces around equals
+                </span>
+                <span id="tabbed" class="beside">
+                    tab between attributes
+                </span>
+                <span id="multiline" class="split">
+                    split across lines
+                </span>
+                <span id="named" "stray"="">
+                    stray equals
+                </span>
+                <span id="empty">
+                </span>
+                <span id="slash" />
+            </div>
+        </div>
+        <div ID="upper-id">
+            Uppercase id attribute.
+            <a href="https://example.com/second">
+                second link
+            </a>
+        </div>
+        <p id="voids" class="test">
+            Line one.
+            <br />
+            Line two.
+            <br />
+            Line three.
+            <BR />
+        </p>
+        <div id="media">
+            <img alt="width > height" src="pic.png" />
+            <hr />
+            <input type="text" value="hello" checked="" />
+        </div>
+        <div id="mismatch">
+            <span id="inner-span">
+                left open
+            </span>
+        </div>
+        <div id="close-space">
+            closed with space before the bracket
+        </div>
+        <script>
+            if (a < b) { var tag = "<p>not a paragraph</p>"; }
+        </script>
+        <!-- comment between elements -->
+        <DIV id="case-div">
+            closed with an uppercase tag
+        </DIV>
+    </body>
+</html>
+after the html element

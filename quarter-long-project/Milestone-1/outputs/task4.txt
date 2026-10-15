@@ -1,0 +1,21 @@
+<body id="page">
+<section id="parent-section">
+<p id="intro">
+<a href="https://example.com" id="first-link">
+<B id="upper-bold">
+<P id="upper-p">
+<b id="inner-bold">
+<div id="nested">
+<span id="spaced">
+<span id="tabbed" class="beside">
+<span id="multiline" class="split">
+<span id="named" "stray"="">
+<span id="empty">
+<span id="slash" />
+<div ID="upper-id">
+<p id="voids">
+<div id="media">
+<div id="mismatch">
+<span id="inner-span">
+<div id="close-space">
+<DIV id="case-div">

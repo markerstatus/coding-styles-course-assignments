@@ -23,8 +23,11 @@ RAW_TEXT_TAGS = {"script", "style"}
 
 
 def formatNode(node, layers=0, includeChildren=True):
+    # param: node: dict or string, the node to print.
+    # param: layers: int, how deep this node sits. each layer is four spaces.
+    # param: includeChildren: bool, False prints the opening tag alone.
+    # return: html: string, the indented html for this node.
     # turn one node into indented html. prettify and findAllbyTag both use this.
-    # layers is how deep this node sits. each layer is four spaces.
     indent = "    " * layers
     if isinstance(node, str):
         # drop the spaces that separated this text from nearby tags,
@@ -72,11 +75,20 @@ def formatNode(node, layers=0, includeChildren=True):
 
 
 class ReplacedSoup:
+    # class: ReplacedSoup
+    # param: string_input is the html string to parse.
+    # param: parser is the parser to use.
+    # return: a ReplacedSoup object.
+
+    # this is a replacement / rewrite of beautiful soup 4.
     # A node looks like:
     # {"name": "body", "attrs": {"id": "page"}, "children": [], "selfClosing": False}
     # The root node is named "[document]". Text and comments are nodes too.
 
     def __init__(self, string_input, parser="html.parser"):
+        # param: string_input: string, the html to parse.
+        # param: parser: string, "html.parser", or anything else for xml.
+        # return: None. the tree is stored on self.parsed_tree.
         self.parsed_tree = {}
         if parser == "html.parser":
             self.htmlParser(string_input)
@@ -84,9 +96,14 @@ class ReplacedSoup:
             self.xmlParser(string_input)
 
     def findTagContent(self, html_string, startIndex):
-        # startIndex is "<". Return the text inside the tag and the
-        # index of its ">". A ">" inside a quoted attribute is not the end.
+        # param: html_string: string, the html to read.
+        # param: startIndex: int, the index of "<".
+        # return: tagContent: string, the text between "<" and ">".
+        # return: endIndex: int, the index of ">", or -1 if the tag never closes.
+
+        # need this to handle quoted attributes
         isQuoted = None  # None means not quoted, chr(34) or chr(39) means quoted
+
         i = startIndex + 1
         while i < len(html_string):
             char = html_string[i]
@@ -106,6 +123,10 @@ class ReplacedSoup:
         return html_string[startIndex + 1 :], -1
 
     def skipWhitespace(self, text, index):
+        # param: text is the text to skip whitespace in.
+        # param: index is the index to start skipping from.
+        # return: the index of the first non-whitespace character.
+
         # used in between attributes.
         #   to avoid instances like this:
         #   <span id="name1">
@@ -115,8 +136,10 @@ class ReplacedSoup:
         return index
 
     def parseTagContent(self, tagContent):
-        # turn the inside of a tag, such as 'span id="name1" /',
-        # into a node. whitespace includes spaces, tabs, and newlines.
+        # param: tagContent: string, the inside of a tag, such as 'span id="name1" /'.
+        # return: node: dict, name, attrs, children, and selfClosing.
+        # turn the inside of a tag into a node.
+        # whitespace includes spaces, tabs, and newlines.
         tagContent = tagContent.strip()
         # a trailing slash means the tag closes itself, as in <br />.
         selfClosing = tagContent.endswith("/")
@@ -168,6 +191,11 @@ class ReplacedSoup:
         }
 
     def readAttributeValue(self, tagContent, index):
+        # param: tagContent: string, content inside, e.g. <{content}>
+        # param: index: int, index of the character to start reading from. e.g. 0
+        # return: attrValue: string, the attribute value.
+        # return: newIndex: int, index of the next character.
+
         # Quoted values may contain spaces, as in content="width=device-width, initial-scale=1".
         if index < len(tagContent) and (
             tagContent[index] == chr(34) or tagContent[index] == chr(39)
@@ -188,7 +216,10 @@ class ReplacedSoup:
         return tagContent[valueStart:index], index
 
     def closingTagName(self, tagContent):
-        # "/div" or "/span\n" both mean the tag name "div" or "span".
+        # param: tagContent: string, content inside, e.g. </{content}>
+        # return: name: string, the name of the tag.
+        # e.g. </div> or </span\n> both mean the tag name "div" or "span".
+
         name = tagContent.strip()[1:]
         end = 0
         while end < len(name) and not name[end].isspace():
@@ -196,6 +227,10 @@ class ReplacedSoup:
         return name[:end]
 
     def appendText(self, htmlStack, textContent):
+        # param: htmlStack: list, the stack of html nodes.
+        # param: textContent: string, the text to append.
+        # return: None
+
         # if the text is empty, do nothing
         if textContent.strip() == "":
             return
@@ -205,6 +240,10 @@ class ReplacedSoup:
         )
 
     def closeMatchingTag(self, htmlStack, closeName):
+        # param: htmlStack: list, the stack of html nodes.
+        # param: closeName: string, the name of the tag to close.
+        # return: None
+
         # Pop the matching open tag and anything still open inside it.
         # A later </div> must not close whichever node happens to be on top.
         for index in range(len(htmlStack) - 1, 0, -1):
@@ -213,6 +252,14 @@ class ReplacedSoup:
                 return
 
     def readRawText(self, html_string, lowerHtml, startIndex, tagName):
+        # param: html_string: string, the html string to read from.
+        # param: lowerHtml: string, the html string in lowercase.
+        # param: startIndex: int, the index to start reading from.
+        # param: tagName: string, the name of the tag to read until.
+        # return: rawText: string, the raw text.
+        # return: closeIndex: int, the index of the next character
+
+        # need this to handle raw text tags like <script> and <style>.
         # Copy characters until </script> or </style>, without parsing them.
         closeMarker = "</" + tagName.lower()
         closeIndex = lowerHtml.find(closeMarker, startIndex)
@@ -221,6 +268,8 @@ class ReplacedSoup:
         return html_string[startIndex:closeIndex], closeIndex
 
     def htmlParser(self, html_string):
+        # param: html_string: string, the html document to parse.
+        # return: None. the tree is stored on self.parsed_tree.
         # every node hangs off this root. The top of the stack is the
         # tag that is still open, so new nodes are added there.
         rootNode = {"name": "[document]", "attrs": {}, "children": []}
@@ -298,17 +347,25 @@ class ReplacedSoup:
         self.parsed_tree = rootNode
 
     def xmlParser(self):
+        # return: None. xml parsing is not implemented.
         return
 
     def prettify(self):
+        # return: html: string, the indented document.
         # the same formatter that prints a single found tag.
         return formatNode(self.parsed_tree)
 
     def writeToFile(self, filename):
+        # param: filename: string, the path to write the prettified html to.
+        # return: None
         with open(filename, "w") as file:
             file.write(self.prettify())
 
     def findAllbyTagRecursively(self, node, strippedTagName, found):
+        # param: node: dict or string, the node to search under.
+        # param: strippedTagName: string, the lowercase tag name to match.
+        # param: found: list, matching nodes are appended here.
+        # return: None
         # text and a doctype's extra words are strings, not tags.
         if not isinstance(node, dict):
             return
@@ -318,6 +375,8 @@ class ReplacedSoup:
             self.findAllbyTagRecursively(child, strippedTagName, found)
 
     def findAllbyTag(self, tagName):
+        # param: tagName: string, the tag to find. brackets are stripped.
+        # return: tags: string, each match's opening tag, one per line.
         # strip the tags. only leave the tag name.
         # go through the tree recursively, then format each match.
         strippedTagName = tagName.strip().strip("<>/").lower()
@@ -326,6 +385,9 @@ class ReplacedSoup:
         return "\n".join(formatNode(node, includeChildren=False) for node in found)
 
     def collectTags(self, node, found):
+        # param: node: dict or string, the node to walk.
+        # param: found: list, element tags are appended here.
+        # return: None
         # text, comments, and the doctype are not element tags.
         # the document root is only a container for the real tags.
         if not isinstance(node, dict):
@@ -336,6 +398,7 @@ class ReplacedSoup:
             self.collectTags(child, found)
 
     def findAllTags(self):
+        # return: tags: string, each element's opening tag, one per line.
         # walk the whole tree and print each element's opening tag.
         found = []
         # recursively collect all tags.
@@ -343,6 +406,10 @@ class ReplacedSoup:
         return "\n".join(formatNode(node, includeChildren=False) for node in found)
 
     def renameTagsRecursively(self, node, oldName, newName):
+        # param: node: dict or string, the node to walk.
+        # param: oldName: string, the lowercase tag name to replace.
+        # param: newName: string, the name to write in its place.
+        # return: None
         # text and a doctype's extra words are strings, not tags.
         if not isinstance(node, dict):
             return
@@ -353,12 +420,19 @@ class ReplacedSoup:
             self.renameTagsRecursively(child, oldName, newName)
 
     def renameTags(self, oldName, newName):
+        # param: oldName: string, the tag to rename. brackets are stripped.
+        # param: newName: string, the new tag name. brackets are stripped.
+        # return: None
         # strip the brackets, then walk the tree and rename each match.
         strippedOldName = oldName.strip().strip("<>/").lower()
         strippedNewName = newName.strip().strip("<>/").lower()
         self.renameTagsRecursively(self.parsed_tree, strippedOldName, strippedNewName)
 
     def setClassRecursively(self, node, tagName, classValue):
+        # param: node: dict or string, the node to walk.
+        # param: tagName: string, the lowercase tag name to change.
+        # param: classValue: string, the class to set.
+        # return: None
         # text and a doctype's extra words are strings, not tags.
         if not isinstance(node, dict):
             return
@@ -374,11 +448,18 @@ class ReplacedSoup:
             self.setClassRecursively(child, tagName, classValue)
 
     def setClass(self, tagName, classValue):
+        # param: tagName: string, the tag to change. brackets are stripped.
+        # param: classValue: string, the class to set, as in class="test".
+        # return: None
         # strip the brackets, then walk the tree and set class on each match.
         strippedTagName = tagName.strip().strip("<>/").lower()
         self.setClassRecursively(self.parsed_tree, strippedTagName, classValue)
 
     def collectText(self, node, pieces, strip):
+        # param: node: dict or string, the node to walk.
+        # param: pieces: list, text strings are appended here.
+        # param: strip: bool, True drops the space between tags.
+        # return: None
         # comments and the doctype are markup, not readable text.
         if not isinstance(node, dict):
             return
@@ -400,6 +481,10 @@ class ReplacedSoup:
             self.collectText(child, pieces, strip)
 
     def get_text(self, node=None, separator="", strip=False):
+        # param: node: dict or None, the node to read. None means the whole document.
+        # param: separator: string, placed between text pieces.
+        # param: strip: bool, True strips each piece and drops blanks.
+        # return: text: string, the joined text inside the node.
         # Beautiful Soup's get_text. join the text inside this node.
         # a missing node means the whole document.
         # nested tags count, so <p>Another <b>bold</b> word.</p>
@@ -411,15 +496,20 @@ class ReplacedSoup:
         return separator.join(pieces)
 
     def __str__(self):
+        # return: tree: string, the parsed tree.
         return str(self.parsed_tree)
 
 
 def readHTMLFile(filename):
+    # param: filename: string, the path of the html file to read.
+    # return: html: string, the file contents.
     with open(filename, "r") as file:
         return file.read()
 
 
 def main(filename):
+    # param: filename: string, the path of the html file to parse.
+    # return: None. prints the text of every <p> tag.
     html_doc = readHTMLFile(filename)
     soupTree = ReplacedSoup(html_doc, "html.parser")
     # task 8: get_text on every <p>, including text inside nested tags.

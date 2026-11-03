@@ -51,8 +51,13 @@ public class JarClasses {
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 String name = entry.getName();
-                // Keep real .class files only (skip folders, META-INF, etc.)
-                if (name.endsWith(".class") && !entry.isDirectory()) {
+                // Keep real .class files only.
+                // Skip directories, META-INF (multi-release overlays), and module-info
+                // (module descriptors are not loadable as normal classes).
+                if (name.endsWith(".class")
+                        && !entry.isDirectory()
+                        && !name.startsWith("META-INF/")
+                        && !name.endsWith("module-info.class")) {
                     String className = name
                             .substring(0, name.length() - ".class".length())
                             .replace('/', '.'); // Java packages use dots, jar paths use /

@@ -10,5 +10,5 @@
 ```bash
 cd exercise5
 javac JarClasses.java
-java JarClasses testFile.jar
+java JarClasses json-java.jar
 ```

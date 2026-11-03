@@ -17,7 +17,7 @@ import java.util.List;
 
 
 // need to have a argument to the program to specify the jar file
-public class ReadClassesFromJarFile {
+public class JarClasses {
     public static void main(String[] args) throws Exception {
         // Need a jar path from the command line
         if (args.length < 1) {

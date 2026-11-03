@@ -9,6 +9,6 @@
 
 ```bash
 cd exercise5
-javac ReadClassesFromJarFile.java
-java ReadClassesFromJarFile testFile.jar
+javac JarClasses.java
+java JarClasses testFile.jar
 ```
